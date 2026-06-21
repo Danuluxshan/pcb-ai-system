@@ -1,0 +1,37 @@
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# Database — SQLite via SQLAlchemy (no psycopg2 needed)
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+
+# AI — Detection
+ultralytics==8.2.18
+
+# AI — Defect classifier + XAI
+torch==2.3.0
+torchvision==0.18.0
+pytorch-grad-cam==1.5.0
+
+# OCR
+paddlepaddle==2.6.1
+paddleocr==2.7.3
+
+# Image processing
+opencv-python-headless==4.9.0.80
+Pillow==10.3.0
+numpy==1.26.4
+
+# Knowledge base matching
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.25.1
+
+# Report generation
+reportlab==4.1.0
+openpyxl==3.1.2
+
+# Utilities
+python-dotenv==1.0.1
+pydantic-settings==2.2.1
