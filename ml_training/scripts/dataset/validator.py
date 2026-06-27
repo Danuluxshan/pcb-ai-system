@@ -24,13 +24,7 @@ from typing import List
 
 import yaml
 
-@dataclass
-class DatasetStatistics:
-    dataset_name: str
-    image_count: int
-    label_count: int
-    missing_labels: int
-    orphan_labels: int
+from .models import DatasetStatistics
 
 class DatasetValidator:
 

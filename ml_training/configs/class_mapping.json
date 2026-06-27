@@ -5,14 +5,9 @@
   "Cap4": "Capacitor",
   "capacitor": "Capacitor",
   "capacitor_smd": "Capacitor",
-
   "Resestor": "Resistor",
-
-  "integrated_circuit": "IC",
-
   "Led": "LED",
-
+  "integrated_circuit": "IC",
   "Pot": "Potentiometer",
-
   "Mov": "MOV"
 }
