@@ -1,0 +1,18 @@
+{
+  "Cap1": "Capacitor",
+  "Cap2": "Capacitor",
+  "Cap3": "Capacitor",
+  "Cap4": "Capacitor",
+  "capacitor": "Capacitor",
+  "capacitor_smd": "Capacitor",
+
+  "Resestor": "Resistor",
+
+  "integrated_circuit": "IC",
+
+  "Led": "LED",
+
+  "Pot": "Potentiometer",
+
+  "Mov": "MOV"
+}

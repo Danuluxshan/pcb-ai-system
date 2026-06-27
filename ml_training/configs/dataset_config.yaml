@@ -1,0 +1,10 @@
+dataset_root: "D:/PCB_AI_DATASETS"
+
+datasets:
+  - Electronic
+  - Electronic Components
+  - PCB
+  - PCB Components
+  - PCB Project
+
+report_path: "ml_training/reports"
