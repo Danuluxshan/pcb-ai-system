@@ -19,40 +19,54 @@ Validates YOLO datasets before model training.
 """
 
 from pathlib import Path
-from dataclasses import dataclass
 from typing import List
-
-import yaml
-
-from .models import DatasetStatistics
+from .loader import DatasetLoader
+from .loader import DatasetLoader
+from .models import DatasetInfo, DatasetStatistics
 
 class DatasetValidator:
 
-    IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
+    # IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
 
-    def __init__(self, dataset_path: Path):
-        self.dataset_path = dataset_path
+    def __init__(self, dataset: DatasetInfo):
+        self.dataset = dataset
+    
+    """
+    Returns all image files.
+    """
+    
+    def get_image_files(self):
 
-    def count_images(self) -> List[Path]:
+        IMAGE_EXTENSIONS = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".bmp"
+        }
+
         images = []
 
-        for ext in self.IMAGE_EXTENSIONS:
+        for ext in IMAGE_EXTENSIONS:
+
             images.extend(
-                self.dataset_path.rglob(f"*{ext}")
+                self.dataset.root_path.rglob(
+                    f"*{ext}"
+                )
             )
 
         return images
+    
+    def get_label_files(self):
 
-    def count_labels(self) -> List[Path]:
         return list(
-            self.dataset_path.rglob("*.txt")
+            self.dataset.root_path.rglob("*.txt")
         )
-
+    
     def find_missing_labels(self):
 
         missing = []
 
-        image_files = self.count_images()
+        image_files = self.get_image_files()
 
         for image in image_files:
 
@@ -74,7 +88,7 @@ class DatasetValidator:
 
         orphan = []
 
-        labels = self.count_labels()
+        labels = self.get_label_files()
 
         for label in labels:
 
@@ -88,11 +102,11 @@ class DatasetValidator:
 
         return orphan
     
-    def validate(self):
+    def validate(self) -> DatasetStatistics:
 
-        images = self.count_images()
+        images = self.get_image_files()
 
-        labels = self.count_labels()
+        labels = self.get_label_files()
 
         missing = self.find_missing_labels()
 
@@ -100,7 +114,7 @@ class DatasetValidator:
 
         stats = DatasetStatistics(
 
-            dataset_name=self.dataset_path.name,
+            dataset_name=self.dataset.name,
 
             image_count=len(images),
 
@@ -116,9 +130,11 @@ class DatasetValidator:
     
 def main():
 
-    dataset = Path(
-        input("Dataset Path: ")
-    )
+    dataset_path = Path(input("Dataset Path: "))
+
+    loader = DatasetLoader(dataset_path)
+
+    dataset = loader.load()
 
     validator = DatasetValidator(dataset)
 

@@ -15,3 +15,20 @@ YYYY-MM-DD
 ### Next
 
 - Build Dataset Validation Utility
+
+## Sprint 1
+
+### Module
+
+Dataset Validator
+
+### Completed
+
+- Refactored validator to use DatasetInfo.
+- Added DatasetStatistics model.
+- Added CSV report generation.
+- Added logging.
+
+### Next
+
+Dataset Extractor

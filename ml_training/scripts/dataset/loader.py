@@ -30,9 +30,11 @@ class DatasetLoader:
         return DatasetInfo(
             name=self.dataset_root.name,
             root_path=self.dataset_root,
-            train_path=self.dataset_root / config["train"],
-            val_path=self.dataset_root / config["val"],
-            test_path=self.dataset_root / config["test"],
+            train_path=(self.dataset_root / config["train"]).resolve(),
+            val_path=(self.dataset_root / config["val"]).resolve(),
+            test_path=(self.dataset_root / config["test"]).resolve(),
+            # val_path=self.dataset_root / config["val"],
+            # test_path=self.dataset_root / config["test"],
             num_classes=config["nc"],
             class_names=config["names"],
         )

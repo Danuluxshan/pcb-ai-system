@@ -1,13 +1,44 @@
 {
-  "Cap1": "Capacitor",
-  "Cap2": "Capacitor",
-  "Cap3": "Capacitor",
-  "Cap4": "Capacitor",
-  "capacitor": "Capacitor",
-  "capacitor_smd": "Capacitor",
-  "Resestor": "Resistor",
-  "Led": "LED",
-  "integrated_circuit": "IC",
-  "Pot": "Potentiometer",
-  "Mov": "MOV"
+    "Button": "Button",
+
+    "Capacitor": "Capacitor",
+    "capacitor": "Capacitor",
+    "capacitor_smd": "Capacitor",
+    "Cap1": "Capacitor",
+    "Cap2": "Capacitor",
+    "Cap3": "Capacitor",
+    "Cap4": "Capacitor",
+
+    "Connector": "Connector",
+
+    "Diode": "Diode",
+
+    "Diode Zener": "Zener_Diode",
+
+    "Fuse": "Fuse",
+
+    "IC": "IC",
+    "integrated_circuit": "IC",
+
+    "Inductor": "Inductor",
+
+    "Jumper": "Jumper",
+
+    "LED": "LED",
+    "Led": "LED",
+
+    "MOSFET": "MOSFET",
+
+    "Mov": "MOV",
+
+    "Pot": "Potentiometer",
+    "Potentiometer": "Potentiometer",
+
+    "Resistor": "Resistor",
+    "Resestor": "Resistor",
+    "resistor": "Resistor",
+
+    "Transformer": "Transformer",
+
+    "Transistor": "Transistor"
 }

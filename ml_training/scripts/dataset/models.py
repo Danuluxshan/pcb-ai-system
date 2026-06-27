@@ -35,14 +35,15 @@ class DatasetInfo:
 
 @dataclass
 class DatasetStatistics:
-    """
-    Stores dataset validation statistics.
-    """
 
     dataset_name: str
 
     image_count: int = 0
     label_count: int = 0
+
+    train_images: int = 0
+    val_images: int = 0
+    test_images: int = 0
 
     missing_labels: int = 0
     orphan_labels: int = 0
@@ -52,3 +53,19 @@ class DatasetStatistics:
     corrupted_images: int = 0
 
     invalid_boxes: int = 0
+
+    class_distribution: dict[str, int] = field(default_factory=dict)
+
+@dataclass
+class AnnotationStatistics:
+    dataset_name: str
+
+    total_labels: int = 0
+
+    detection_labels: int = 0
+
+    segmentation_labels: int = 0
+
+    invalid_labels: int = 0
+
+    annotation_type: str = ""

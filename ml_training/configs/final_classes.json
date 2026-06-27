@@ -1,18 +1,20 @@
 {
-    "0": "Button",
-    "1": "Capacitor",
-    "2": "Connector",
-    "3": "Diode",
-    "4": "Zener_Diode",
-    "5": "Fuse",
-    "6": "IC",
-    "7": "Inductor",
-    "8": "Jumper",
-    "9": "LED",
-    "10": "MOSFET",
-    "11": "MOV",
-    "12": "Potentiometer",
-    "13": "Resistor",
-    "14": "Transformer",
-    "15": "Transistor"
+    "classes": [
+        "Button",
+        "Capacitor",
+        "Connector",
+        "Diode",
+        "Zener_Diode",
+        "Fuse",
+        "IC",
+        "Inductor",
+        "Jumper",
+        "LED",
+        "MOSFET",
+        "MOV",
+        "Potentiometer",
+        "Resistor",
+        "Transformer",
+        "Transistor"
+    ]
 }
