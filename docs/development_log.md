@@ -29,6 +29,35 @@ Dataset Validator
 - Added CSV report generation.
 - Added logging.
 
+## Phase 3
+
+### Completed
+
+- Dataset validation
+- Dataset structure analysis
+- Annotation format analysis
+
 ### Next
 
-Dataset Extractor
+- Dataset cleaning
+- Class normalization
+
+# 2026-06-27
+
+## Module
+
+Dataset Mapper
+
+### Completed
+
+- Created mapper module
+- Loaded mapping configuration
+- Loaded unified class configuration
+
+### Status
+
+In Progress
+
+### Next
+
+Mapping Preview

@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import String, Float, Integer, Text, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
-from app.database.connection import Base
+from backend.database.connection import Base
 
 
 def new_uuid() -> str:

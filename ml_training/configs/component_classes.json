@@ -1,0 +1,18 @@
+{
+    "Button":0,
+    "Capacitor":1,
+    "Connector":2,
+    "Diode":3,
+    "Zener_Diode":4,
+    "Fuse":5,
+    "IC":6,
+    "Inductor":7,
+    "Jumper":8,
+    "LED":9,
+    "MOSFET":10,
+    "MOV":11,
+    "Potentiometer":12,
+    "Resistor":13,
+    "Transformer":14,
+    "Transistor":15
+}

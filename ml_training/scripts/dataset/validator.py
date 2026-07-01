@@ -37,30 +37,38 @@ class DatasetValidator:
     
     def get_image_files(self):
 
-        IMAGE_EXTENSIONS = {
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".bmp"
-        }
+        image_extensions = {".jpg", ".jpeg", ".png", ".bmp"}
 
         images = []
 
-        for ext in IMAGE_EXTENSIONS:
+        for split in ["train", "valid", "test"]:
 
-            images.extend(
-                self.dataset.root_path.rglob(
-                    f"*{ext}"
-                )
-            )
+            image_dir = self.dataset.root_path / split / "images"
+
+            if not image_dir.exists():
+                continue
+
+            for ext in image_extensions:
+                images.extend(image_dir.glob(f"*{ext}"))
 
         return images
     
     def get_label_files(self):
 
-        return list(
-            self.dataset.root_path.rglob("*.txt")
-        )
+        label_files = []
+
+        for split in ["train", "valid", "test"]:
+
+            label_dir = self.dataset.root_path / split / "labels"
+
+            if label_dir.exists():
+
+                label_files.extend(
+                    label_dir.glob("*.txt")
+                )
+
+        return label_files
+    
     
     def find_missing_labels(self):
 

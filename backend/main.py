@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings, STATIC_DIR
-from app.database.connection import init_db
-from app.routers import inspection, history, reports, knowledge
+from backend.database.connection import init_db
+from backend.routers import reports
+from backend.routers import history, inspection, knowledge
 
 
 # ── Lifespan: runs ONCE at startup and shutdown ──────────────────────
@@ -23,10 +24,10 @@ async def lifespan(app: FastAPI):
 
     # Load AI models into app.state (shared across all requests)
     # These imports are here to avoid loading torch at module level
-    from app.services.detection  import DetectionService
-    from app.services.classifier import DefectClassifier
-    from app.services.ocr        import ComponentOCR
-    from app.services.xai        import HeatmapGenerator
+    from backend.services.detection  import DetectionService
+    from backend.services.classifier import DefectClassifier
+    from backend.services.ocr        import ComponentOCR
+    from backend.services.xai        import HeatmapGenerator
 
     app.state.detector   = DetectionService(settings.YOLO_MODEL_PATH)
     app.state.classifier = DefectClassifier(settings.EFFNET_MODEL_PATH)

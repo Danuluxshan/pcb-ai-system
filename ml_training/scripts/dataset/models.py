@@ -69,3 +69,13 @@ class AnnotationStatistics:
     invalid_labels: int = 0
 
     annotation_type: str = ""
+
+@dataclass
+class MappingResult:
+    dataset_name: str
+
+    total_classes: int
+
+    mapped_classes: dict[str, str]
+
+    unknown_classes: list[str]
