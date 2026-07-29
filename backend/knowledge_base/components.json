@@ -1,0 +1,317 @@
+{
+  "Resistor": {
+    "description": "Passive component that limits current flow",
+    "test_method": "Resistance (Ω) measurement",
+    "steps": [
+      "Power off the circuit completely",
+      "Set multimeter to Resistance (Ω) mode",
+      "Select appropriate range (e.g., 20kΩ for a 10kΩ resistor)",
+      "Disconnect at least one resistor lead from the circuit",
+      "Touch red probe to one lead, black probe to the other",
+      "Read the measured resistance value"
+    ],
+    "expected": "Within ±5% of nominal value printed on component",
+    "good_condition": "Measured value within tolerance range",
+    "bad_conditions": [
+      "Reading shows OL (open circuit) — resistor is broken internally",
+      "Reading shows 0Ω (short circuit) — resistor is shorted",
+      "Reading deviates more than 20% from nominal — degraded"
+    ],
+    "tolerance_percent": 10,
+    "repair": "Replace with same resistance value and wattage rating"
+  },
+  "Capacitor": {
+    "description": "Stores and releases electrical energy",
+    "test_method": "Capacitance (F) measurement or ESR test",
+    "steps": [
+      "Power off and discharge the circuit (short leads briefly)",
+      "Set multimeter to Capacitance mode (F symbol)",
+      "Disconnect capacitor from circuit",
+      "For polarised capacitors: red probe to positive (+) lead",
+      "Touch probes to capacitor leads",
+      "Wait for stable reading"
+    ],
+    "expected": "Within ±20% of rated capacitance value",
+    "good_condition": "Capacitance within 20% of rated value",
+    "bad_conditions": [
+      "Reading shows OL — capacitor is open",
+      "Reading shows 0 — capacitor is shorted",
+      "Physical signs: bulging top, leaked electrolyte"
+    ],
+    "tolerance_percent": 20,
+    "repair": "Replace with same capacitance, voltage rating, and polarity type"
+  },
+  "Diode": {
+    "description": "Allows current flow in one direction only",
+    "test_method": "Diode test mode",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Diode test mode (diode symbol)",
+      "Touch red probe to anode (+), black probe to cathode (-)",
+      "Read forward voltage drop",
+      "Reverse probes and check reverse reading"
+    ],
+    "expected": "Forward: 0.5–0.7V (silicon), 0.2–0.3V (germanium). Reverse: OL",
+    "good_condition": "Forward voltage 0.6–0.7V, reverse reads OL",
+    "bad_conditions": [
+      "Forward reads OL — diode is open (broken)",
+      "Both directions read 0 — diode is shorted",
+      "Reverse conducts — diode is leaking"
+    ],
+    "tolerance_percent": 15,
+    "repair": "Replace with same type and voltage/current rating"
+  },
+  "Zener_Diode": {
+    "description": "Diode that regulates voltage by conducting in reverse at zener voltage",
+    "test_method": "Diode test mode (forward direction same as regular diode)",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Diode test mode",
+      "Test forward direction: red to anode, black to cathode",
+      "Read forward voltage drop",
+      "Note: zener voltage requires special test circuit to verify"
+    ],
+    "expected": "Forward: 0.5–0.7V (same as silicon diode in forward direction)",
+    "good_condition": "Forward voltage 0.6–0.7V; reverse reads OL in diode mode",
+    "bad_conditions": [
+      "Forward reads OL — zener is open",
+      "Both directions conduct — zener is shorted"
+    ],
+    "tolerance_percent": 10,
+    "repair": "Replace with same zener voltage and power rating"
+  },
+  "Transistor": {
+    "description": "Semiconductor device for amplification or switching",
+    "test_method": "Diode test mode on each junction",
+    "steps": [
+      "Power off the circuit",
+      "Identify pins: Base (B), Collector (C), Emitter (E)",
+      "Set multimeter to Diode test mode",
+      "For NPN: red probe to Base, black to Emitter — expect 0.6–0.7V",
+      "Red probe to Base, black to Collector — expect 0.6–0.7V",
+      "All other combinations should read OL"
+    ],
+    "expected": "B-E junction: 0.6–0.7V forward. B-C junction: 0.6–0.7V forward. All reverse: OL",
+    "good_condition": "Both junctions show proper diode behaviour",
+    "bad_conditions": [
+      "Any junction reads 0 — junction is shorted",
+      "Any junction reads OL forward — junction is open",
+      "C-E reads conductive — transistor is shorted"
+    ],
+    "tolerance_percent": 15,
+    "repair": "Replace with same transistor type (NPN/PNP) and specifications"
+  },
+  "MOSFET": {
+    "description": "Field-effect transistor controlled by gate voltage",
+    "test_method": "Diode test mode on body diode",
+    "steps": [
+      "Power off the circuit",
+      "Identify pins: Gate (G), Drain (D), Source (S)",
+      "Set multimeter to Diode test mode",
+      "For N-channel: red probe to Source, black to Drain — expect 0.4–0.6V",
+      "Reverse should read OL",
+      "Gate to Source/Drain should read OL in both directions"
+    ],
+    "expected": "Source-Drain body diode: 0.4–0.6V forward, OL reverse. Gate: OL both ways",
+    "good_condition": "Body diode intact, gate properly isolated",
+    "bad_conditions": [
+      "D-S reads 0 in both directions — MOSFET shorted",
+      "Gate conducts — gate oxide breakdown"
+    ],
+    "tolerance_percent": 15,
+    "repair": "Replace with same type, voltage, and current rating"
+  },
+  "IC": {
+    "description": "Integrated circuit containing multiple electronic functions",
+    "test_method": "Visual inspection + supply voltage check",
+    "steps": [
+      "Power off the circuit",
+      "Visually inspect for burn marks, cracked package, bent pins",
+      "Set multimeter to DC Voltage mode",
+      "Power on the circuit carefully",
+      "Measure VCC pin to GND — should match rated supply voltage",
+      "Measure GND pin — should read 0V"
+    ],
+    "expected": "Supply voltage within ±10% of rated value (e.g., 4.5–5.5V for 5V IC)",
+    "good_condition": "Correct supply voltage present, no visible damage",
+    "bad_conditions": [
+      "IC is hot to touch — excessive current draw",
+      "Supply voltage absent or wrong — power delivery issue",
+      "Visible burn marks — IC failed"
+    ],
+    "tolerance_percent": 10,
+    "repair": "Replace with exact IC part number; check surrounding circuit for root cause"
+  },
+  "LED": {
+    "description": "Light Emitting Diode — produces light when forward biased",
+    "test_method": "Diode test mode",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Diode test mode",
+      "Touch red probe to anode (+, longer lead), black to cathode (-)",
+      "LED should glow faintly in diode test mode",
+      "Read forward voltage",
+      "Reverse probes — should read OL"
+    ],
+    "expected": "Forward voltage: 1.8–2.2V (red/yellow), 2.8–3.4V (blue/white/green). Reverse: OL",
+    "good_condition": "Correct forward voltage and LED glows during test",
+    "bad_conditions": [
+      "No glow and OL reading — LED is open",
+      "Reads 0 forward — LED is shorted",
+      "Wrong forward voltage — LED degraded"
+    ],
+    "tolerance_percent": 20,
+    "repair": "Replace with same colour, forward voltage, and current rating"
+  },
+  "Inductor": {
+    "description": "Coil that stores energy in magnetic field and resists current changes",
+    "test_method": "Resistance (Ω) measurement of coil winding",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to low Resistance mode (200Ω range)",
+      "Disconnect inductor from circuit if possible",
+      "Touch probes to both inductor leads",
+      "Read DC resistance of winding"
+    ],
+    "expected": "Very low resistance (typically 0.1–50Ω depending on inductor type)",
+    "good_condition": "Low DC resistance reading — winding intact",
+    "bad_conditions": [
+      "OL reading — winding is open (broken coil)",
+      "Higher than expected resistance — partial winding damage"
+    ],
+    "tolerance_percent": 20,
+    "repair": "Replace with same inductance value and current rating"
+  },
+  "Fuse": {
+    "description": "Overcurrent protection device that breaks circuit when current exceeds rating",
+    "test_method": "Continuity or resistance test",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Continuity mode (beep symbol) or low Ω range",
+      "Touch probes to both fuse terminals",
+      "Listen for beep (continuity mode) or read resistance"
+    ],
+    "expected": "Good fuse: continuity beep or near 0Ω. Blown fuse: OL (open circuit)",
+    "good_condition": "Continuity present — fuse intact",
+    "bad_conditions": [
+      "OL or no beep — fuse is blown",
+      "Visually check for broken wire or blackening inside glass fuse"
+    ],
+    "tolerance_percent": 0,
+    "repair": "Replace with EXACT same current rating and type. Investigate why fuse blew before replacement."
+  },
+  "Connector": {
+    "description": "Mechanical interface for connecting/disconnecting electrical circuits",
+    "test_method": "Continuity test on each pin",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Continuity mode",
+      "Test each pin from connector entry to PCB pad",
+      "Check for bent, corroded, or missing pins visually"
+    ],
+    "expected": "Each pin shows continuity from plug to socket; no cross-connections between pins",
+    "good_condition": "All pins show continuity; no shorts between adjacent pins",
+    "bad_conditions": [
+      "OL on a pin — broken or dirty contact",
+      "Beep between adjacent pins — short circuit in connector"
+    ],
+    "tolerance_percent": 0,
+    "repair": "Clean with contact cleaner; replace connector if pins are bent or broken"
+  },
+  "Jumper": {
+    "description": "Short-circuit connector used to configure circuit options",
+    "test_method": "Continuity test",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Continuity mode",
+      "Touch probes to both jumper pins",
+      "Should beep if jumper cap is installed"
+    ],
+    "expected": "Continuity when jumper cap installed; open circuit when removed",
+    "good_condition": "Correct continuity based on jumper cap presence",
+    "bad_conditions": [
+      "No continuity with cap installed — bad jumper cap or corroded pins"
+    ],
+    "tolerance_percent": 0,
+    "repair": "Replace jumper cap or clean pins with contact cleaner"
+  },
+  "Switch": {
+    "description": "Mechanical device to open or close a circuit",
+    "test_method": "Continuity test in both switch positions",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to Continuity mode",
+      "Test switch in OFF position — should read OL (no beep)",
+      "Activate switch to ON position",
+      "Test again — should read continuity (beep)"
+    ],
+    "expected": "OFF: OL (open). ON: continuity (near 0Ω)",
+    "good_condition": "Clear switching between open and closed states",
+    "bad_conditions": [
+      "Always OL — switch contacts corroded or broken",
+      "Always continuity — switch shorted internally"
+    ],
+    "tolerance_percent": 0,
+    "repair": "Clean with contact cleaner; replace switch if mechanism is broken"
+  },
+  "Transformer": {
+    "description": "Transfers electrical energy between circuits via magnetic coupling",
+    "test_method": "Winding resistance test on primary and secondary",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to low Resistance mode",
+      "Test primary winding: touch probes to primary input pins",
+      "Test secondary winding: touch probes to secondary output pins",
+      "Both should show low resistance"
+    ],
+    "expected": "Primary and secondary windings both show low resistance (typically 1–100Ω)",
+    "good_condition": "Both windings show low, measurable resistance",
+    "bad_conditions": [
+      "OL on any winding — winding is open (broken)",
+      "0Ω on winding — winding is shorted",
+      "Burning smell — insulation breakdown"
+    ],
+    "tolerance_percent": 20,
+    "repair": "Replace transformer with same specifications (voltage ratio, current rating)"
+  },
+  "Potentiometer": {
+    "description": "Variable resistor with adjustable resistance",
+    "test_method": "Resistance measurement across wiper and ends",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to appropriate Resistance range",
+      "Measure end-to-end resistance (pins 1 to 3) — should equal rated value",
+      "Measure pin 1 to wiper (pin 2) while rotating",
+      "Measure pin 2 to pin 3 while rotating",
+      "Both should change smoothly without jumps"
+    ],
+    "expected": "End-to-end = rated value. Wiper readings vary smoothly 0 to rated value",
+    "good_condition": "Smooth, continuous resistance change across full rotation",
+    "bad_conditions": [
+      "Scratchy or jumping readings — dirty or worn track",
+      "OL end-to-end — resistive track broken",
+      "Wiper reads OL at some positions — open track"
+    ],
+    "tolerance_percent": 20,
+    "repair": "Clean with contact cleaner; replace if track is worn"
+  },
+  "MOV": {
+    "description": "Metal Oxide Varistor — protects circuit from voltage spikes",
+    "test_method": "Resistance test (high resistance expected in normal state)",
+    "steps": [
+      "Power off the circuit",
+      "Set multimeter to high Resistance range (20MΩ if available)",
+      "Touch probes to both MOV leads",
+      "Read resistance in normal (non-conducting) state"
+    ],
+    "expected": "Very high resistance (>1MΩ) in normal state — MOV not conducting",
+    "good_condition": "Very high resistance indicates MOV is intact",
+    "bad_conditions": [
+      "Low resistance or near 0Ω — MOV has clamped and failed short",
+      "Visible cracking or burn marks — MOV absorbed a surge and failed",
+      "OL is also acceptable (some MOVs read OL when healthy)"
+    ],
+    "tolerance_percent": 50,
+    "repair": "Replace with same varistor voltage (Vnom) and energy rating. Check power supply for surge source."
+  }
+}

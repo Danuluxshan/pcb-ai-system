@@ -1,0 +1,45 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-bg:   #0f1923;
+  --sidebar-active: #1a2e40;
+  --accent:       #7dd3fc;
+  --accent-bg:    #1e3a5f;
+  --surface:      #ffffff;
+  --page-bg:      #f0f4f8;
+  --border:       #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted:   #94a3b8;
+  --success:      #22c55e;
+  --success-bg:   #f0fdf4;
+  --success-text: #15803d;
+  --warning:      #f59e0b;
+  --warning-bg:   #fffbeb;
+  --warning-text: #b45309;
+  --danger:       #ef4444;
+  --danger-bg:    #fef2f2;
+  --danger-text:  #b91c1c;
+  --radius:       8px;
+  --radius-lg:    12px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* Utility */
+.text-muted    { color: var(--text-muted); }
+.text-success  { color: var(--success-text); }
+.text-warning  { color: var(--warning-text); }
+.text-danger   { color: var(--danger-text); }
+.font-mono     { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }

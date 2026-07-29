@@ -1,0 +1,22 @@
+names:
+- Button
+- Capacitor
+- Connector
+- Diode
+- Zener_Diode
+- Fuse
+- IC
+- Inductor
+- Jumper
+- LED
+- MOSFET
+- MOV
+- Potentiometer
+- Resistor
+- Switch
+- Transformer
+- Transistor
+nc: 17
+path: E:\ICBT Assignment\Danu\DP\DP_Project_Final\DP_Project_Final\pcb-ai-system\backend\admin_dataset
+train: yolo_train/images
+val: yolo_val/images
