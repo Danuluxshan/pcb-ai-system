@@ -61,10 +61,29 @@ export const getTrainStatus   = async () =>
   (await adminApi.get('/train/status')).data;
 export const getModels        = async () =>
   (await adminApi.get('/models')).data;
-export const activateModel    = async (id) =>
-  (await adminApi.post(`/models/${id}/activate`)).data;
+export const activateModel = async (id, forceReplace = false) =>
+  (await adminApi.post(`/models/${id}/activate?force_replace=${forceReplace}`)).data;
 
 export const isAdminLoggedIn = () => !!localStorage.getItem('admin_token');
 export const getAdminUser    = () => localStorage.getItem('admin_user') || 'Admin';
 
 export default adminApi;
+
+export const getImageUrl = (id) =>
+  `${API_BASE}/api/admin/dataset/${id}/image`;
+
+export const getAnnotations = async (imageId) =>
+  (await adminApi.get(`/dataset/${imageId}/annotations`)).data;
+
+export const saveAnnotations = async (imageId, boxes) =>
+  (await adminApi.post(`/dataset/${imageId}/annotations`, { boxes })).data;
+
+export const deleteModel = async (id) =>
+  (await adminApi.delete(`/models/${id}`)).data;
+
+export const changeCredentials = async (currentPassword, newUsername, newPassword) =>
+  (await adminApi.put('/change-credentials', {
+    current_password: currentPassword,
+    new_username: newUsername || null,
+    new_password: newPassword || null,
+  })).data;

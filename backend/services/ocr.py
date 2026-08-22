@@ -12,15 +12,12 @@ class ComponentOCR:
 
     def _load(self):
         try:
-            from paddleocr import PaddleOCR
-            self.reader = PaddleOCR(
-                use_angle_cls=True,
-                lang="en",
-                show_log=False,
-            )
-            print("✅ PaddleOCR ready")
+            import easyocr
+            # gpu=False for CPU-only inference (safe default)
+            self.reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+            print("✅ EasyOCR ready")
         except Exception as e:
-            print(f"⚠️ PaddleOCR unavailable: {e}")
+            print(f"⚠️ EasyOCR unavailable: {e}")
 
     def read(self, image: np.ndarray, bbox: Dict) -> Dict[str, Any]:
         """Read text marking on a component crop."""
@@ -38,24 +35,24 @@ class ComponentOCR:
         if crop.size == 0:
             return self._empty("Empty region")
 
-        # Preprocess
+        # Preprocess: grayscale + threshold + upscale (helps small text)
         gray    = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
         _, thr  = cv2.threshold(
             gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
         )
         upscale = cv2.resize(thr, None, fx=2, fy=2,
                              interpolation=cv2.INTER_CUBIC)
+        upscale_bgr = cv2.cvtColor(upscale, cv2.COLOR_GRAY2BGR)
 
         try:
-            result = self.reader.ocr(upscale, cls=True)
-            if not result or not result[0]:
+            # EasyOCR readtext returns list of (bbox, text, confidence)
+            results = self.reader.readtext(upscale_bgr)
+
+            if not results:
                 return self._empty("No text found")
 
-            texts, confs = [], []
-            for line in result[0]:
-                if line and len(line) >= 2:
-                    texts.append(str(line[1][0]))
-                    confs.append(float(line[1][1]))
+            texts = [str(r[1]) for r in results]
+            confs = [float(r[2]) for r in results]
 
             text     = " ".join(texts).strip()
             avg_conf = sum(confs) / len(confs) if confs else 0.0

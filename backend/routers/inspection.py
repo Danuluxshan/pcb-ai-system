@@ -9,8 +9,23 @@ from typing import Optional
 from database.connection import get_db
 from database import models as db_models
 from app.config import UPLOAD_DIR, settings
+from routers.notifications import create_notification
 
 router = APIRouter()
+
+def _clean_numpy(obj):
+    """Recursively convert numpy types to native Python types for JSON serialization."""
+    if isinstance(obj, dict):
+        return {k: _clean_numpy(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_clean_numpy(v) for v in obj]
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
 
 
 def _bytes_to_cv2(data: bytes) -> np.ndarray:
@@ -128,6 +143,13 @@ async def inspect(
     db.commit()
 
     elapsed = int((time.time() - start_ms) * 1000)
+    health_score_val = health.get('score', 0) if isinstance(health, dict) else health
+    create_notification(
+        db, type="inspection_complete",
+        title="Inspection complete",
+        message=f"{len(components)} components detected — health score {health_score_val:.0f}%",
+        link=f"/results/{inspection_id}",
+    )
 
     return {
         "inspection_id":       inspection_id,

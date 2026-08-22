@@ -5,7 +5,7 @@ export const staticUrl = (path) => `${API_BASE}${path}`;
 
 const api = axios.create({
   baseURL: `${API_BASE}/api`,
-  timeout: 60000,
+  timeout: 180000,   // 3 minutes
 });
 
 // ── Inspection ───────────────────────────────────────────────────────
@@ -85,5 +85,15 @@ export const healthCheck = async () => {
   const { data } = await api.get('/health');
   return data;
 };
+
+export const getNotifications = async (limit=20) =>
+  (await api.get('/notifications', { params:{limit} })).data;
+export const markNotificationRead = async (id) =>
+  (await api.post(`/notifications/${id}/read`)).data;
+export const markAllNotificationsRead = async () =>
+  (await api.post('/notifications/read-all')).data;
+
+export const saveComponentDiagnosis = async (inspectionId, componentId, diagnosis, severity) =>
+  (await api.patch(`/inspect/${inspectionId}/components/${componentId}/diagnosis`, { diagnosis, severity })).data;
 
 export default api;

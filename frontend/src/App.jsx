@@ -1,18 +1,24 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import Dashboard   from './pages/Dashboard';
-import NewInspect  from './pages/NewInspection';
-import Results     from './pages/Results';
-import Diagnosis   from './pages/Diagnosis';
-import History     from './pages/History';
+import Dashboard from './pages/Dashboard';
+import NewInspect from './pages/NewInspection';
+import Results from './pages/Results';
+import Diagnosis from './pages/Diagnosis';
+import History from './pages/History';
 import './index.css';
 
 // Admin pages
-import AdminLogin     from './pages/admin/AdminLogin';
+import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminDataset   from './pages/admin/AdminDataset';
-import AdminTraining  from './pages/admin/AdminTraining';
-import AdminModels    from './pages/admin/AdminModels';
+import AdminDataset from './pages/admin/AdminDataset';
+import AdminTraining from './pages/admin/AdminTraining';
+import AdminModels from './pages/admin/AdminModels';
+import AdminAnnotate from './pages/admin/AdminAnnotate';
+import AdminLearnContent from './pages/admin/AdminLearnContent';
+import Learn from './pages/Learn';
+import AdminLearningMedia from './pages/admin/AdminLearningMedia';
+import AdminForgotPassword from './pages/admin/AdminForgotPassword';
+
 
 // export default function App() {
 //   return (
@@ -57,16 +63,27 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={
           <AdminRoute><AdminDashboard /></AdminRoute>
-        }/>
+        } />
         <Route path="/admin/dataset" element={
           <AdminRoute><AdminDataset /></AdminRoute>
-        }/>
+        } />
         <Route path="/admin/train" element={
           <AdminRoute><AdminTraining /></AdminRoute>
-        }/>
+        } />
         <Route path="/admin/models" element={
           <AdminRoute><AdminModels /></AdminRoute>
-        }/>
+        } />
+        <Route path="/admin/annotate/:imageId" element={
+          <AdminRoute><AdminAnnotate /></AdminRoute>
+        } />
+        <Route path="/admin/learn" element={
+          <AdminRoute><AdminLearnContent /></AdminRoute>
+        } />
+        <Route path="/admin/media" element={
+          <AdminRoute><AdminLearningMedia /></AdminRoute>
+        } />
+        <Route path="/learn" element={<Layout><Learn /></Layout>} />
+        <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
       </Routes>
     </BrowserRouter>
   );

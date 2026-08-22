@@ -38,9 +38,13 @@ class DetectionService:
     def detect_sahi(self, image: np.ndarray) -> Dict[str, Any]:
         """SAHI tile-based inference for small SMD components."""
         try:
-            from sahi import AutoDetectionModel
-            from sahi.predict import get_sliced_prediction
+            import importlib
             import tempfile, os
+
+            sahi = importlib.import_module("sahi")
+            AutoDetectionModel = sahi.AutoDetectionModel
+            sahi_predict = importlib.import_module("sahi.predict")
+            get_sliced_prediction = sahi_predict.get_sliced_prediction
 
             sahi_model = AutoDetectionModel.from_pretrained(
                 model_type="ultralytics",
@@ -66,12 +70,12 @@ class DetectionService:
                 detections.append({
                     "id":         str(uuid.uuid4()),
                     "class_name": pred.category.name,
-                    "confidence": round(pred.score.value, 3),
+                    "confidence": round(float(pred.score.value), 3),
                     "bbox": {
                         "x1": int(b.minx), "y1": int(b.miny),
                         "x2": int(b.maxx), "y2": int(b.maxy),
                     },
-                    "is_uncertain": pred.score.value < settings.DEFECT_CONF_THRESHOLD,
+                    "is_uncertain": float(pred.score.value) < settings.DEFECT_CONF_THRESHOLD,
                 })
 
             # Draw on image

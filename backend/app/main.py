@@ -9,6 +9,13 @@ from database.connection import init_db
 from routers import reports
 from routers import history, inspection, knowledge
 from routers import admin
+from routers import education
+from routers import learning
+from routers import chatbot
+from routers import notifications
+from routers import component_update
+from routers import auth_recovery
+
 
 
 # ── Lifespan: runs ONCE at startup and shutdown ──────────────────────
@@ -78,6 +85,12 @@ app.include_router(history.router,    prefix="/api", tags=["History"])
 app.include_router(reports.router,    prefix="/api", tags=["Reports"])
 app.include_router(knowledge.router,  prefix="/api", tags=["Knowledge"])
 app.include_router(admin.router, prefix="/api", tags=["Admin"])
+app.include_router(education.router, prefix="/api", tags=["Education"])
+app.include_router(learning.router, prefix="/api", tags=["Learning"])
+app.include_router(chatbot.router, prefix="/api", tags=["Chatbot"])
+app.include_router(notifications.router, prefix="/api", tags=["Notifications"])
+app.include_router(component_update.router, prefix="/api", tags=["Components"])
+app.include_router(auth_recovery.router, prefix="/api", tags=["Admin Auth Recovery"])
 
 
 @app.get("/api/health", tags=["System"])
