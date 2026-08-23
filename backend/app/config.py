@@ -2,6 +2,7 @@
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
+
 # ── Project root paths ───────────────────────────────────────────────
 BASE_DIR    = Path(__file__).resolve().parent.parent   # → backend/
 STATIC_DIR  = BASE_DIR / "static"
@@ -10,6 +11,7 @@ HEATMAP_DIR = STATIC_DIR / "heatmaps"
 REPORT_DIR  = STATIC_DIR / "reports"
 MODEL_DIR   = BASE_DIR / "ai_models"
 KB_DIR      = BASE_DIR / "knowledge_base"
+
 
 # ── Ensure all directories exist on startup ──────────────────────────
 for d in [UPLOAD_DIR, HEATMAP_DIR, REPORT_DIR]:
@@ -37,6 +39,19 @@ class Settings(BaseSettings):
     # ── API settings ─────────────────────────────────────────────────
     API_VERSION: str = "1.0.0"
     MAX_UPLOAD_SIZE_MB: int = 10
+
+    # ── Chatbot (Gemini API) ─────────────────────────────────────────
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.6-flash"
+
+
+    # ── Email (SMTP) ────────────────────────────────────────────────
+    SMTP_HOST:     str = "smtp.gmail.com"
+    SMTP_PORT:     int = 587
+    SMTP_USER:     str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM:     str = ""
+    
 
     class Config:
         env_file = ".env"   # override any value in .env file

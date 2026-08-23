@@ -1,6 +1,6 @@
 # backend/app/database/crud.py
 from sqlalchemy.orm import Session
-from backend.database.models import Inspection, Component
+from database.models import Inspection, Component
 import uuid
 
 

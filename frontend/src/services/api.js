@@ -1,98 +1,99 @@
-// frontend/src/services/api.js
-// All API calls go through this file. One place to change the base URL.
-
 import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-// Static files (uploads, heatmaps, reports) are served by FastAPI
-// Your decision: backend/static/ + StaticFiles middleware
 export const staticUrl = (path) => `${API_BASE}${path}`;
 
 const api = axios.create({
   baseURL: `${API_BASE}/api`,
-  timeout: 30000,   // 30s — AI inference can take up to 8s per board
+  timeout: 180000,   // 3 minutes
 });
 
-// ── Inspection endpoints ─────────────────────────────────────────────
-
-/** POST /api/inspect — upload PCB image, receive full inspection result */
-export const inspectPCB = async (imageFile, onUploadProgress) => {
+// ── Inspection ───────────────────────────────────────────────────────
+export const inspectPCB = async (imageFile, useSahi = false, onUploadProgress) => {
   const form = new FormData();
   form.append('file', imageFile);
-  const { data } = await api.post('/inspect', form, {
+  const { data } = await api.post(`/inspect?use_sahi=${useSahi}`, form, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress,
   });
-  return data;  // InspectionResponse
-};
-
-/** PATCH /api/measure — submit multimeter reading */
-export const submitMeasurement = async (componentId, type, value, unit) => {
-  const { data } = await api.patch('/measure', {
-    component_id: componentId,
-    measurement_type: type,
-    value,
-    unit,
-  });
-  return data;  // MeasurementResponse
-};
-
-/** GET /api/inspect/:id — fetch a full inspection by ID */
-export const getInspection = async (id) => {
-  const { data } = await api.get(`/inspect/${id}`);
   return data;
 };
 
-// ── History endpoints ────────────────────────────────────────────────
+export const submitMeasurement = async (
+  inspectionId, componentId, measurementType, value, unit, nominal = null
+) => {
+  const { data } = await api.post(
+    `/inspect/${inspectionId}/measure`,
+    null,
+    { params: { component_id: componentId, measurement_type: measurementType,
+                value, unit, nominal } }
+  );
+  return data;
+};
 
-/** GET /api/history — paginated inspection history */
+export const getInspection = async (id) => {
+  const { data } = await api.get(`/history/${id}`);
+  return data;
+};
+
+// ── History ──────────────────────────────────────────────────────────
 export const getHistory = async (page = 1, limit = 10) => {
   const { data } = await api.get('/history', { params: { page, limit } });
-  return data;  // HistoryResponse
-};
-
-/** GET /api/compare — compare two inspections */
-export const compareInspections = async (id1, id2) => {
-  const { data } = await api.get('/compare', { params: { id1, id2 } });
   return data;
 };
 
-// ── Reports endpoints ────────────────────────────────────────────────
+export const deleteInspection = async (id) => {
+  await api.delete(`/history/${id}`);
+};
 
-/** GET /api/report/:id — download PDF or Excel report */
-export const downloadReport = async (inspectionId, format = 'pdf') => {
-  const response = await api.get(`/report/${inspectionId}`, {
-    params: { format },
+// ── Reports ──────────────────────────────────────────────────────────
+export const downloadReport = async (inspectionId) => {
+  const response = await api.get(`/reports/${inspectionId}/pdf`, {
     responseType: 'blob',
   });
-  // Trigger browser download
   const url  = URL.createObjectURL(response.data);
   const link = document.createElement('a');
   link.href  = url;
-  link.download = `pcb_inspection_${inspectionId}.${format}`;
+  link.download = `pcb_report_${inspectionId.slice(0, 8)}.pdf`;
   link.click();
   URL.revokeObjectURL(url);
 };
 
-// ── Knowledge base endpoints ─────────────────────────────────────────
-
-/** GET /api/knowledge/:part — look up component by part number */
-export const lookupPart = async (partNumber) => {
-  const { data } = await api.get(`/knowledge/${partNumber}`);
+// ── Knowledge base ───────────────────────────────────────────────────
+export const getComponents = async () => {
+  const { data } = await api.get('/knowledge/components');
   return data;
 };
 
-/** GET /api/testing/:class — get testing procedure for component class */
-export const getTestingProcedure = async (componentClass) => {
-  const { data } = await api.get(`/testing/${componentClass}`);
+export const getInstructions = async (componentName) => {
+  const { data } = await api.get(`/knowledge/${componentName}`);
   return data;
 };
 
-/** GET /api/health — server health check */
+export const diagnoseComponent = async (componentName, measuredValue, nominalValue, unit) => {
+  const { data } = await api.post('/knowledge/diagnose', {
+    component_name:  componentName,
+    measured_value:  measuredValue,
+    nominal_value:   nominalValue,
+    unit:            unit || '',
+  });
+  return data;
+};
+
+// ── Health ───────────────────────────────────────────────────────────
 export const healthCheck = async () => {
   const { data } = await api.get('/health');
   return data;
 };
+
+export const getNotifications = async (limit=20) =>
+  (await api.get('/notifications', { params:{limit} })).data;
+export const markNotificationRead = async (id) =>
+  (await api.post(`/notifications/${id}/read`)).data;
+export const markAllNotificationsRead = async () =>
+  (await api.post('/notifications/read-all')).data;
+
+export const saveComponentDiagnosis = async (inspectionId, componentId, diagnosis, severity) =>
+  (await api.patch(`/inspect/${inspectionId}/components/${componentId}/diagnosis`, { diagnosis, severity })).data;
 
 export default api;

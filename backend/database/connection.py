@@ -34,5 +34,11 @@ def get_db():
 
 def init_db():
     """Create all tables on startup. Safe to call multiple times."""
-    from backend.database import models   # import here to avoid circular imports
+    from database import models   # import here to avoid circular imports
+    Base.metadata.create_all(bind=engine)
+
+def init_db():
+    """Create all tables on startup."""
+    from database import models          # existing models
+    from routers import admin            # admin models import பண்ணணும்
     Base.metadata.create_all(bind=engine)

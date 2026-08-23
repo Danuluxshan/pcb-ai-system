@@ -1,0 +1,6 @@
+CONTEXT: reportlab import
+
+Traceback (most recent call last):
+  File "E:\ICBT Assignment\Danu\DP\DP_Project_Final\DP_Project_Final\pcb-ai-system\backend\routers\reports.py", line 54, in generate_pdf
+    from reportlab.lib.pagesizes import A4
+ModuleNotFoundError: No module named 'reportlab'
