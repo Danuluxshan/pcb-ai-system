@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList, Cpu, AlertTriangle, HeartPulse, Clock, ArrowUpRight,
@@ -42,7 +42,7 @@ const HealthRing = ({ score }) => {
   const r = 46, circ = 2 * Math.PI * r;
   const fill = (score / 100) * circ;
   const color = score >= 80 ? '#22c55e' : score >= 50 ? '#f59e0b' : '#ef4444';
-  const band  = score >= 80 ? 'Good' : score >= 50 ? 'Needs Maintenance' : 'Critical';
+  const band = score >= 80 ? 'Good' : score >= 50 ? 'Needs Maintenance' : 'Critical';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
       <div style={{ position: 'relative', width: 116, height: 116, flexShrink: 0 }}>
@@ -54,8 +54,10 @@ const HealthRing = ({ score }) => {
           <circle cx={58} cy={58} r={r} fill="none" stroke="var(--page-bg)" strokeWidth={10} />
           <circle cx={58} cy={58} r={r} fill="none" stroke={color} strokeWidth={10}
             strokeDasharray={`${fill} ${circ}`} strokeLinecap="round"
-            style={{ transition: 'stroke-dasharray 900ms cubic-bezier(0.4,0,0.2,1)',
-              filter: `drop-shadow(0 0 6px ${color}66)` }} />
+            style={{
+              transition: 'stroke-dasharray 900ms cubic-bezier(0.4,0,0.2,1)',
+              filter: `drop-shadow(0 0 6px ${color}66)`
+            }} />
         </svg>
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
@@ -80,25 +82,30 @@ const HealthRing = ({ score }) => {
 
 const getBand = (score) =>
   score >= 80 ? { label: 'Good', color: '#15803d', bg: '#eefcf3', dot: '#22c55e' }
-  : score >= 50 ? { label: 'Needs Maintenance', color: '#b45309', bg: '#fffaeb', dot: '#f59e0b' }
-  : { label: 'Critical', color: '#b91c1c', bg: '#fef2f2', dot: '#ef4444' };
+    : score >= 50 ? { label: 'Needs Maintenance', color: '#b45309', bg: '#fffaeb', dot: '#f59e0b' }
+      : { label: 'Critical', color: '#b91c1c', bg: '#fef2f2', dot: '#ef4444' };
 
 export default function Dashboard() {
   const [history, setHistory] = useState([]);
-  const [apiOk,   setApiOk]   = useState(false);
+  const [apiOk, setApiOk] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    healthCheck().then(() => setApiOk(true)).catch(() => setApiOk(false));
+    const checkApi = () => healthCheck().then(() => setApiOk(true)).catch(() => setApiOk(false));
+    checkApi();
+    const interval = setInterval(checkApi, 10000); // re-check every 10s
+
     getHistory(1, 5)
       .then(d => setHistory(d.inspections || []))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
+
+    return () => clearInterval(interval);
   }, []);
 
   const totalComps = history.reduce((s, i) => s + (i.total_components || 0), 0);
-  const avgHealth  = history.length
+  const avgHealth = history.length
     ? Math.round(history.reduce((s, i) => s + (i.health_score || 0), 0) / history.length)
     : 0;
   const faults = history.filter(i => (i.health_score || 100) < 50).length;

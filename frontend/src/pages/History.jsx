@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, RefreshCw, Plus, Eye, FileText, Trash2, Cpu, History as HistoryIcon,
@@ -8,15 +8,18 @@ import { getHistory, deleteInspection, downloadReport } from '../services/api';
 
 const getBand = (score) =>
   score >= 80 ? { label: 'Good', color: 'var(--success-text)', bg: 'var(--success-bg)' }
-  : score >= 50 ? { label: 'Maintenance', color: 'var(--warning-text)', bg: 'var(--warning-bg)' }
-  : { label: 'Critical', color: 'var(--danger-text)', bg: 'var(--danger-bg)' };
+    : score >= 50 ? { label: 'Maintenance', color: 'var(--warning-text)', bg: 'var(--warning-bg)' }
+      : { label: 'Critical', color: 'var(--danger-text)', bg: 'var(--danger-bg)' };
+
 
 export default function History() {
-  const [data,    setData]    = useState({ inspections: [], total: 0 });
-  const [page,    setPage]    = useState(1);
-  const [search,  setSearch]  = useState('');
+  const [data, setData] = useState({ inspections: [], total: 0 });
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
+  const [searchResults, setSearchResults] = useState(null); // null = normal paginated view
+  const [searching, setSearchResults2] = useState(false);
   const navigate = useNavigate();
   const LIMIT = 10;
 
@@ -30,7 +33,39 @@ export default function History() {
 
   useEffect(() => { load(1); }, []);
 
-  const filtered = data.inspections.filter(i => !search || i.id.toLowerCase().includes(search.toLowerCase()));
+  // Debounced search across ALL history (not just the current page)
+  useEffect(() => {
+    const q = search.trim();
+    if (!q) { setSearchResults(null); return; }
+
+    const timer = setTimeout(async () => {
+      setSearchResults2(true);
+      try {
+        // Fetch every inspection so the search covers all pages, not just the loaded one
+        const first = await getHistory(1, 1);
+        const total = first.total || 0;
+        const full = await getHistory(1, Math.max(total, 1));
+        setSearchResults(full.inspections || []);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchResults2(false);
+      }
+    }, 400); // wait for the user to stop typing
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const sourceList = searchResults !== null ? searchResults : data.inspections;
+  const isSearchMode = searchResults !== null;
+
+  const filtered = sourceList.filter(i => {
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    const displayName = `pcb_${i.id.slice(0, 8)}`.toLowerCase();
+    const band = (i.health_band || '').toLowerCase();
+    return i.id.toLowerCase().includes(q) || displayName.includes(q) || band.includes(q);
+  });
   const totalPages = Math.ceil(data.total / LIMIT);
 
   const handleDelete = async (id) => {
@@ -85,8 +120,13 @@ export default function History() {
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by inspection ID..."
-            className="input-modern" style={{ width: '100%', paddingLeft: 34 }} />
+            placeholder="Search by inspection ID or name (searches all pages)..."
+            className="input-modern" style={{ width: '100%', paddingLeft: 34, paddingRight: searching ? 34 : 12 }} />
+          {searching && (
+            <div style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: 'var(--text-muted)' }}>
+              ⟳
+            </div>
+          )}
         </div>
         <button className="btn btn-ghost" onClick={() => load(page)} style={{ padding: '10px 16px' }}>
           <RefreshCw size={14} /> Refresh
@@ -110,6 +150,10 @@ export default function History() {
           {loading ? (
             <div style={{ padding: 20 }}>
               {[1, 2, 3, 4].map(i => <div key={i} className="skeleton" style={{ height: 50, borderRadius: 10, marginBottom: 8 }} />)}
+            </div>
+          ) : filtered.length === 0 && isSearchMode ? (
+            <div style={{ padding: 50, textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>No inspections match "{search}"</div>
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: 50, textAlign: 'center' }}>
@@ -183,7 +227,7 @@ export default function History() {
           )}
         </div>
 
-        {totalPages > 1 && (
+        {totalPages > 1 && !isSearchMode && (
           <div style={{
             padding: '10px 18px', borderTop: '0.5px solid var(--border)', display: 'flex',
             alignItems: 'center', gap: 8, background: 'var(--page-bg)', flexShrink: 0,
@@ -211,8 +255,10 @@ export default function History() {
           { label: 'Pass Rate', value: `${passRate}%`, color: 'var(--success-text)', Icon: TrendingUp },
           { label: 'Total Inspections', value: data.total, color: 'var(--text-primary)', Icon: ClipboardList },
           { label: 'Components Tested', value: totalComps.toLocaleString(), color: 'var(--text-primary)', Icon: Cpu },
-          { label: 'Avg Health Score', value: `${avgHealth}%`, Icon: Activity,
-            color: avgHealth >= 80 ? 'var(--success-text)' : avgHealth >= 50 ? 'var(--warning-text)' : 'var(--danger-text)' },
+          {
+            label: 'Avg Health Score', value: `${avgHealth}%`, Icon: Activity,
+            color: avgHealth >= 80 ? 'var(--success-text)' : avgHealth >= 50 ? 'var(--warning-text)' : 'var(--danger-text)'
+          },
         ].map(({ label, value, color, Icon }) => (
           <div key={label} className="card" style={{ padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{

@@ -267,7 +267,7 @@ export default function AdminAnnotate() {
           <select value={selClass} onChange={e => setSelClass(e.target.value)}
             style={{ width:'100%', padding:'8px 10px', borderRadius:8,
               border:'0.5px solid rgba(255,255,255,0.15)', fontSize:12,
-              background:'rgba(255,255,255,0.06)', color:'#fff' }}>
+              background:'rgba(63, 216, 247, 0.94)', color:'#110000' }}>
             {CLASSES_17.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 

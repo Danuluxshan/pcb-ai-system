@@ -2,23 +2,30 @@ import { useState, useEffect } from 'react';
 import { LayoutDashboard, Cpu, Image as ImageIcon, Gauge } from 'lucide-react';
 import AdminSidebar from '../../components/AdminSidebar';
 import { getAdminStats } from '../../services/adminApi';
+import { useLocation } from 'react-router-dom';
+import LoginSuccessToast from '../../components/LoginSuccessToast';
 
 const CLASSES_17 = [
-  "Button","Capacitor","Connector","Diode","Zener_Diode",
-  "Fuse","IC","Inductor","Jumper","LED","MOSFET","MOV",
-  "Potentiometer","Resistor","Switch","Transformer","Transistor"
+  "Button", "Capacitor", "Connector", "Diode", "Zener_Diode",
+  "Fuse", "IC", "Inductor", "Jumper", "LED", "MOSFET", "MOV",
+  "Potentiometer", "Resistor", "Switch", "Transformer", "Transistor"
 ];
 
 export default function AdminDashboard() {
-  const [stats,   setStats]   = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const [showLoginToast, setShowLoginToast] = useState(!!location.state?.justLoggedIn);
 
   useEffect(() => {
-    getAdminStats().then(setStats).catch(() => {}).finally(() => setLoading(false));
+    getAdminStats().then(setStats).catch(() => { }).finally(() => setLoading(false));
   }, []);
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#0d1520' }}>
+      {showLoginToast && (
+        <LoginSuccessToast username={location.state?.loggedInUser} />
+      )}
       <AdminSidebar active="/admin" />
 
       <div style={{ flex: 1, overflow: 'auto', padding: 26, background: 'var(--page-bg)' }} className="fade-in">
@@ -39,11 +46,11 @@ export default function AdminDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
               {[
                 { label: 'Total Inspections', value: stats.total_inspections, Icon: Gauge, color: '#38bdf8' },
-                { label: 'Total Components',  value: stats.total_components,  Icon: Cpu,   color: '#a855f7' },
-                { label: 'Dataset Images',    value: stats.dataset_images,    Icon: ImageIcon, color: '#f59e0b' },
-                { label: 'Active Model mAP',  value: stats.active_model ? `${(stats.active_model.map50*100).toFixed(1)}%` : '—', Icon: Gauge, color: '#22c55e' },
+                { label: 'Total Components', value: stats.total_components, Icon: Cpu, color: '#a855f7' },
+                { label: 'Dataset Images', value: stats.dataset_images, Icon: ImageIcon, color: '#f59e0b' },
+                { label: 'Active Model mAP', value: stats.active_model ? `${(stats.active_model.map50 * 100).toFixed(1)}%` : '—', Icon: Gauge, color: '#22c55e' },
               ].map(({ label, value, Icon, color }, i) => (
-                <div key={label} className={`card card-hover fade-in-up stagger-${i+1}`} style={{ padding: '18px 20px', borderTop: `3px solid ${color}` }}>
+                <div key={label} className={`card card-hover fade-in-up stagger-${i + 1}`} style={{ padding: '18px 20px', borderTop: `3px solid ${color}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <div style={{ fontSize: 10.5, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700, marginBottom: 10 }}>{label}</div>
@@ -65,7 +72,7 @@ export default function AdminDashboard() {
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                   {[
                     ['Version', stats.active_model.version],
-                    ['mAP@50', `${(stats.active_model.map50*100||0).toFixed(1)}%`],
+                    ['mAP@50', `${(stats.active_model.map50 * 100 || 0).toFixed(1)}%`],
                     ['Created', new Date(stats.active_model.created_at).toLocaleDateString()],
                     ['Path', stats.active_model.model_path?.split('\\').pop()],
                   ].map(([k, v]) => (
@@ -80,8 +87,8 @@ export default function AdminDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               {[
-                { title: 'Detection Count per Class', data: stats.class_distribution, delay: 3 },
-                { title: 'Training Images per Class', data: stats.dataset_by_class, delay: 4 },
+                { title: 'Detection Count per Class', data: stats.class_detection_counts, delay: 3 },
+                { title: 'Training Images per Class', data: stats.admin_upload_counts, delay: 4 },
               ].map(({ title, data, delay }) => (
                 <div key={title} className={`card fade-in-up stagger-${delay}`} style={{ padding: 18 }}>
                   <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 14 }}>

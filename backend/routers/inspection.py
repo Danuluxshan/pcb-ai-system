@@ -2,7 +2,7 @@
 import uuid, time
 import numpy as np
 import cv2
-from fastapi import APIRouter, File, UploadFile, Request, HTTPException, Depends, Query
+from fastapi import APIRouter, File, UploadFile, Request, HTTPException, Depends, Query, Form
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -36,9 +36,10 @@ def _bytes_to_cv2(data: bytes) -> np.ndarray:
 @router.post("/inspect", summary="Upload PCB image and run full inspection")
 async def inspect(
     request: Request,
-    file:     UploadFile = File(...),
-    use_sahi: bool       = Query(False, description="Use SAHI tile-based detection"),
-    db:       Session    = Depends(get_db),
+    file:      UploadFile = File(...),
+    use_sahi:  bool       = Query(False, description="Use SAHI tile-based detection"),
+    device_id: str        = Form(None, description="Browser-generated device identifier"),
+    db:        Session    = Depends(get_db),
 ):
     start_ms = time.time()
 
@@ -122,6 +123,7 @@ async def inspect(
         health_band=health["band"],
         severity_summary=severity_counts,
         total_components=len(components),
+        device_id=device_id,
     )
     db.add(db_inspection)
 
@@ -149,8 +151,8 @@ async def inspect(
         title="Inspection complete",
         message=f"{len(components)} components detected — health score {health_score_val:.0f}%",
         link=f"/results/{inspection_id}",
+        device_id=device_id,   # private to the device that ran this inspection
     )
-
     return {
         "inspection_id":       inspection_id,
         "components":          components,

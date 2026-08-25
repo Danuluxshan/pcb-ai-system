@@ -9,14 +9,19 @@ router = APIRouter()
 
 @router.get("/history", summary="Get inspection history")
 def get_history(
-    page:  int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    db:    Session = Depends(get_db),
+    page:      int = Query(1, ge=1),
+    limit:     int = Query(10, ge=1, le=100),
+    device_id: str = Query(None, description="Filter to this device's inspections"),
+    db:        Session = Depends(get_db),
 ):
     offset = (page - 1) * limit
-    total  = db.query(db_models.Inspection).count()
+    base_query = db.query(db_models.Inspection)
+    if device_id:
+        base_query = base_query.filter(db_models.Inspection.device_id == device_id)
+
+    total  = base_query.count()
     items  = (
-        db.query(db_models.Inspection)
+        base_query
         .order_by(db_models.Inspection.created_at.desc())
         .offset(offset)
         .limit(limit)
