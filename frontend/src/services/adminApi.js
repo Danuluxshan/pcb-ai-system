@@ -16,17 +16,16 @@ adminApi.interceptors.request.use(cfg => {
 
 // Auto-logout on 401
 adminApi.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response?.status === 401) {
+  (res) => res,
+  (err) => {
+    const isLoginRequest = err.config?.url?.includes('/login');
+    if (err.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('admin_token');
-      localStorage.removeItem('admin_user');
       window.location.href = '/admin/login';
     }
     return Promise.reject(err);
   }
 );
-
 export const adminLogin = async (username, password) => {
   const { data } = await adminApi.post('/login', { username, password });
   localStorage.setItem('admin_token', data.access_token);

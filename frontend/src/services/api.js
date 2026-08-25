@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getDeviceId } from './deviceId';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 export const staticUrl = (path) => `${API_BASE}${path}`;
@@ -9,12 +10,12 @@ const api = axios.create({
 });
 
 // ── Inspection ───────────────────────────────────────────────────────
-export const inspectPCB = async (imageFile, useSahi = false, onUploadProgress) => {
-  const form = new FormData();
-  form.append('file', imageFile);
-  const { data } = await api.post(`/inspect?use_sahi=${useSahi}`, form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    onUploadProgress,
+export const inspectPCB = async (file, useSahi, onProgress) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('device_id', getDeviceId());
+  const { data } = await api.post(`/inspect?use_sahi=${useSahi}`, formData, {
+    onUploadProgress: onProgress,
   });
   return data;
 };
@@ -25,8 +26,12 @@ export const submitMeasurement = async (
   const { data } = await api.post(
     `/inspect/${inspectionId}/measure`,
     null,
-    { params: { component_id: componentId, measurement_type: measurementType,
-                value, unit, nominal } }
+    {
+      params: {
+        component_id: componentId, measurement_type: measurementType,
+        value, unit, nominal
+      }
+    }
   );
   return data;
 };
@@ -38,7 +43,9 @@ export const getInspection = async (id) => {
 
 // ── History ──────────────────────────────────────────────────────────
 export const getHistory = async (page = 1, limit = 10) => {
-  const { data } = await api.get('/history', { params: { page, limit } });
+  const { data } = await api.get('/history', {
+    params: { page, limit, device_id: getDeviceId() },
+  });
   return data;
 };
 
@@ -51,9 +58,9 @@ export const downloadReport = async (inspectionId) => {
   const response = await api.get(`/reports/${inspectionId}/pdf`, {
     responseType: 'blob',
   });
-  const url  = URL.createObjectURL(response.data);
+  const url = URL.createObjectURL(response.data);
   const link = document.createElement('a');
-  link.href  = url;
+  link.href = url;
   link.download = `pcb_report_${inspectionId.slice(0, 8)}.pdf`;
   link.click();
   URL.revokeObjectURL(url);
@@ -72,10 +79,10 @@ export const getInstructions = async (componentName) => {
 
 export const diagnoseComponent = async (componentName, measuredValue, nominalValue, unit) => {
   const { data } = await api.post('/knowledge/diagnose', {
-    component_name:  componentName,
-    measured_value:  measuredValue,
-    nominal_value:   nominalValue,
-    unit:            unit || '',
+    component_name: componentName,
+    measured_value: measuredValue,
+    nominal_value: nominalValue,
+    unit: unit || '',
   });
   return data;
 };
@@ -87,11 +94,11 @@ export const healthCheck = async () => {
 };
 
 export const getNotifications = async (limit=20) =>
-  (await api.get('/notifications', { params:{limit} })).data;
+  (await api.get('/notifications', { params:{ limit, device_id: getDeviceId() } })).data;
 export const markNotificationRead = async (id) =>
   (await api.post(`/notifications/${id}/read`)).data;
 export const markAllNotificationsRead = async () =>
-  (await api.post('/notifications/read-all')).data;
+  (await api.post('/notifications/read-all', null, { params: { device_id: getDeviceId() } })).data;
 
 export const saveComponentDiagnosis = async (inspectionId, componentId, diagnosis, severity) =>
   (await api.patch(`/inspect/${inspectionId}/components/${componentId}/diagnosis`, { diagnosis, severity })).data;

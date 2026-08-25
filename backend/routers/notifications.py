@@ -32,18 +32,20 @@ class Notification(Base):
     id:         Mapped[str] = mapped_column(String(36), primary_key=True,
                                             default=lambda: str(uuid.uuid4()))
     type:       Mapped[str] = mapped_column(String(50))
-    # type values: "inspection_complete" | "training_complete" | "model_activated"
     title:      Mapped[str] = mapped_column(String(200))
     message:    Mapped[str] = mapped_column(Text)
-    link:       Mapped[str] = mapped_column(Text, nullable=True)  # frontend route to open
+    link:       Mapped[str] = mapped_column(Text, nullable=True)
     is_read:    Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    device_id:  Mapped[str] = mapped_column(String(64), nullable=True, index=True)
 
 
 def create_notification(db: Session, type: str, title: str, message: str,
-                        link: Optional[str] = None) -> Notification:
-    """Call this from other routers at the point an event happens."""
-    n = Notification(type=type, title=title, message=message, link=link)
+                        link: Optional[str] = None, device_id: Optional[str] = None) -> Notification:
+    """Call this from other routers at the point an event happens.
+    Pass device_id for user-triggered events (private); leave None for
+    admin/system events that should be visible to everyone."""
+    n = Notification(type=type, title=title, message=message, link=link, device_id=device_id)
     db.add(n)
     db.commit()
     return n
@@ -58,10 +60,21 @@ def _serialize(n: Notification) -> dict:
 
 
 @router.get("")
-def list_notifications(limit: int = 20, db: Session = Depends(get_db)):
-    rows = db.query(Notification).order_by(
-        Notification.created_at.desc()).limit(limit).all()
-    unread = db.query(Notification).filter_by(is_read=False).count()
+def list_notifications(limit: int = 20, device_id: str = None, db: Session = Depends(get_db)):
+    q = db.query(Notification)
+    if device_id:
+        q = q.filter(
+            (Notification.device_id == device_id) | (Notification.device_id.is_(None))
+        )
+    else:
+        q = q.filter(Notification.device_id.is_(None))
+    rows = q.order_by(Notification.created_at.desc()).limit(limit).all()
+
+    # Unread badge counts only this device's own private notifications +
+    # global ones — but "mark all read" only touches this device's own rows,
+    # so one user's action can't hide a global announcement for everyone.
+    unread = q.filter(Notification.is_read == False).count()
+
     return {
         "notifications": [_serialize(n) for n in rows],
         "unread_count": unread,
@@ -69,8 +82,15 @@ def list_notifications(limit: int = 20, db: Session = Depends(get_db)):
 
 
 @router.get("/unread-count")
-def unread_count(db: Session = Depends(get_db)):
-    return {"unread_count": db.query(Notification).filter_by(is_read=False).count()}
+def unread_count(device_id: str = None, db: Session = Depends(get_db)):
+    q = db.query(Notification)
+    if device_id:
+        q = q.filter(
+            (Notification.device_id == device_id) | (Notification.device_id.is_(None))
+        )
+    else:
+        q = q.filter(Notification.device_id.is_(None))
+    return {"unread_count": q.filter(Notification.is_read == False).count()}
 
 
 @router.post("/{notification_id}/read")
@@ -84,7 +104,16 @@ def mark_read(notification_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/read-all")
-def mark_all_read(db: Session = Depends(get_db)):
-    db.query(Notification).filter_by(is_read=False).update({"is_read": True})
+def mark_all_read(device_id: str = None, db: Session = Depends(get_db)):
+    q = db.query(Notification).filter(Notification.is_read == False)  # noqa: E712
+    if device_id:
+        # Only mark THIS device's own private notifications + globals as read —
+        # avoids one user's "mark all" hiding an announcement for everyone else.
+        q = q.filter(
+            (Notification.device_id == device_id) | (Notification.device_id.is_(None))
+        )
+    else:
+        q = q.filter(Notification.device_id.is_(None))
+    q.update({"is_read": True}, synchronize_session=False)
     db.commit()
-    return {"message": "All notifications marked as read"}
+    return {"message": "Notifications marked as read"}

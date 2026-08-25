@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+﻿import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,14 +8,14 @@ import {
 import { inspectPCB } from '../services/api';
 
 export default function NewInspection() {
-  const [file,     setFile]     = useState(null);
-  const [preview,  setPreview]  = useState(null);
-  const [useSahi,  setUseSahi]  = useState(true);
-  const [damage,   setDamage]   = useState(true);
-  const [ocr,      setOcr]      = useState(true);
-  const [loading,  setLoading]  = useState(false);
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [useSahi, setUseSahi] = useState(true);
+  const [damage, setDamage] = useState(true);
+  const [ocr, setOcr] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error,    setError]    = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const onDrop = useCallback((accepted) => {
@@ -26,9 +26,23 @@ export default function NewInspection() {
     setError('');
   }, []);
 
+  const [uploadError, setUploadError] = useState('');
+
+  const onDropAccepted = useCallback((accepted) => {
+    setUploadError('');
+    onDrop(accepted);
+  }, [onDrop]);
+
+  const onDropRejected = useCallback((rejections) => {
+    const reasons = rejections[0]?.errors?.map(e => e.message).join(', ') || 'Invalid file';
+    setUploadError(`❌ "${rejections[0]?.file?.name}" was rejected: ${reasons}. Please upload a JPG, PNG, or WEBP image.`);
+  }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] },
+    onDropAccepted,
+    onDropRejected,
+    accept: { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'] },
+    maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
     multiple: false,
   });
@@ -145,6 +159,15 @@ export default function NewInspection() {
           </div>
         )}
       </div>
+      {uploadError && (
+        <div style={{
+          marginTop: 10, padding: '9px 13px', borderRadius: 10,
+          background: 'var(--danger-bg)', color: 'var(--danger-text)',
+          fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 7,
+        }}>
+          {uploadError}
+        </div>
+      )}
 
       {/* Detection mode */}
       <div className="fade-in-up stagger-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>

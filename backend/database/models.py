@@ -25,6 +25,7 @@ class Inspection(Base):
     severity_summary: Mapped[dict]     = mapped_column(JSON, nullable=True)
     total_components: Mapped[int]      = mapped_column(Integer, default=0)
     notes:            Mapped[str]      = mapped_column(Text, nullable=True)
+    device_id: Mapped[str] = mapped_column(String(64), nullable=True, index=True)
 
     # Relationship — all components belong to this inspection
     components: Mapped[list["Component"]] = relationship(

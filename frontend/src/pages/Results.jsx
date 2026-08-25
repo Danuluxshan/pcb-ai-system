@@ -125,6 +125,12 @@ export default function Results() {
       display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 16,
       height: 'calc(100vh - 88px)', minHeight: 0,
     }}>
+      <style>{`
+  @keyframes bboxBlink {
+    0%, 100% { opacity: 1; border-color: #fbbf24;background-color: rgba(0, 240, 32, 0.57); }
+    50% { opacity: 0.35; border-color: #f59e0b; background-color: rgba(5, 134, 52, 0.69); }
+  }
+`}</style>
 
       {/* LEFT */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto', minHeight: 0 }}>
@@ -142,19 +148,34 @@ export default function Results() {
               userSelect: 'none',
             }}>
             {result.annotated_image_url ? (
-              <img
-                ref={imgRef}
-                src={staticUrl(result.annotated_image_url)}
-                alt="annotated"
-                draggable={false}
-                onLoad={handleImgLoad}
-                style={{
-                  position: 'absolute', top: '50%', left: '50%',
-                  transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${zoom})`,
-                  transformOrigin: 'center', maxWidth: 'none',
-                  transition: dragging ? 'none' : 'transform 120ms ease',
-                  pointerEvents: 'none',
-                }} />
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${zoom})`,
+                transformOrigin: 'center',
+                transition: dragging ? 'none' : 'transform 120ms ease',
+              }}>
+                <img
+                  ref={imgRef}
+                  src={staticUrl(result.annotated_image_url)}
+                  alt="annotated"
+                  draggable={false}
+                  onLoad={handleImgLoad}
+                  style={{ display: 'block', maxWidth: 'none', pointerEvents: 'none' }} />
+
+                {selected && selected.bbox && (
+                  <div key={selected.id} style={{
+                    position: 'absolute',
+                    left: selected.bbox.x1, top: selected.bbox.y1,
+                    width: selected.bbox.x2 - selected.bbox.x1,
+                    height: selected.bbox.y2 - selected.bbox.y1,
+                    border: '3px solid #fbbf24',
+                    borderRadius: 4,
+                    boxShadow: '0 0 0 3px rgba(251,191,36,0.25)',
+                    pointerEvents: 'none',
+                    animation: 'bboxBlink 1s ease-in-out infinite',
+                  }} />
+                )}
+              </div>
             ) : (
               <div style={{
                 position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',

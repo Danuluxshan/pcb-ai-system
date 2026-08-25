@@ -2,19 +2,21 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Gem, LayoutDashboard, Upload, ScanLine, Stethoscope, History, BookOpen } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import ChatWidget from './ChatWidget';
+import { useApiStatus } from '../hooks/useApiStatus';
 
 const NAV = [
-  { to: '/',          icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/inspect',   icon: Upload,          label: 'New Inspection' },
-  { to: '/results',   icon: ScanLine,        label: 'Results' },
-  { to: '/diagnosis', icon: Stethoscope,     label: 'Diagnosis' },
-  { to: '/history',   icon: History,         label: 'History' },
-  { to: '/learn',     icon: BookOpen,        label: 'Learn' },
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/inspect', icon: Upload, label: 'New Inspection' },
+  { to: '/results', icon: ScanLine, label: 'Results' },
+  { to: '/diagnosis', icon: Stethoscope, label: 'Diagnosis' },
+  { to: '/history', icon: History, label: 'History' },
+  { to: '/learn', icon: BookOpen, label: 'Learn' },
 ];
 
 export default function Layout({ children }) {
   const loc = useLocation();
   const pageLabel = NAV.find(n => n.to === loc.pathname)?.label || 'PCB AI';
+  const { connected: apiConnected } = useApiStatus(10000);
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -72,12 +74,14 @@ export default function Layout({ children }) {
 
         {/* Status */}
         <div style={{ padding: '12px 16px', borderTop: '0.5px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#5c7086' }}>
-            <span style={{
-              width: 6, height: 6, borderRadius: '50%', background: '#22c55e',
-              boxShadow: '0 0 0 3px rgba(34,197,94,0.15)', flexShrink: 0,
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: apiConnected ? '#5c7086' : '#f87171' }}>
+            <span className={apiConnected ? '' : 'pulse'} style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: apiConnected ? '#22c55e' : '#ef4444',
+              boxShadow: apiConnected ? '0 0 0 3px rgba(34,197,94,0.15)' : '0 0 0 3px rgba(239,68,68,0.2)',
+              flexShrink: 0,
             }} />
-            API Connected
+            {apiConnected ? 'API Connected' : 'API Disconnected'}
           </div>
         </div>
       </aside>

@@ -66,12 +66,15 @@ export default function AdminDataset() {
     }
   }, [stats]);
 
+
+  const canUpload = (cls) => stats?.class_status?.[cls]?.can_upload !== false;
+
   const onDrop = useCallback((accepted) => { setUploadedFiles(accepted); setMsg(''); }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop, accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] }, multiple: true,
+    disabled: uploadType === 'single' && !canUpload(uploadCls),
   });
 
-  const canUpload = (cls) => stats?.class_status?.[cls]?.can_upload !== false;
   const getStatusColor = (cls) => {
     const s = stats?.class_status?.[cls]?.status;
     return s === 'blocked' ? '#ef4444' : s === 'sufficient' ? '#f59e0b' : '#22c55e';
@@ -79,7 +82,7 @@ export default function AdminDataset() {
   const selectedStatus = stats?.class_status?.[uploadCls];
 
   const uploadAll = async () => {
-    if (!uploadedFiles.length) return;
+    if (!uploadedFiles.length) { setMsg('❌ Please select or drop image(s) to upload first'); return; }
     const targetClass = uploadType === 'board' ? 'PCB_Board' : uploadCls;
     if (uploadType === 'single') {
       const cs = stats?.class_status?.[uploadCls];
@@ -175,15 +178,24 @@ export default function AdminDataset() {
                 </div>
               )}
 
-              <div {...getRootProps()} style={{
-                border: `2px dashed ${uploadType === 'single' && !canUpload(uploadCls) ? '#fca5a5' : isDragActive ? 'var(--accent-strong)' : 'var(--border-strong)'}`,
-                borderRadius: 14, padding: '22px 14px', textAlign: 'center',
-                background: uploadType === 'single' && !canUpload(uploadCls) ? 'var(--danger-bg)' : isDragActive ? 'var(--info-bg)' : 'var(--page-bg)',
-                cursor: uploadType === 'single' && !canUpload(uploadCls) ? 'not-allowed' : 'pointer',
-                marginBottom: 10, pointerEvents: uploadType === 'single' && !canUpload(uploadCls) ? 'none' : 'auto',
-                transition: 'all 200ms ease',
-              }}>
-                <input {...getInputProps()} />
+              <div {...getRootProps()}
+                onClick={
+                  uploadType === 'single' && !canUpload(uploadCls)
+                    ? (e) => {
+                      e.stopPropagation();
+                      setMsg(`❌ "${uploadCls}" is blocked — already has sufficient data (limit: ${BLOCK_THRESHOLD}). Choose a different class to upload.`);
+                    }
+                    : getRootProps().onClick
+                }
+                style={{
+                  border: `2px dashed ${uploadType === 'single' && !canUpload(uploadCls) ? '#ef4444' : isDragActive ? 'var(--accent-strong)' : 'var(--border-strong)'}`,
+                  borderRadius: 14, padding: '22px 14px', textAlign: 'center',
+                  background: uploadType === 'single' && !canUpload(uploadCls) ? 'var(--danger-bg)' : isDragActive ? 'var(--info-bg)' : 'var(--page-bg)',
+                  cursor: uploadType === 'single' && !canUpload(uploadCls) ? 'not-allowed' : 'pointer',
+                  marginBottom: 10,
+                  transition: 'all 200ms ease',
+                }}>
+                <input {...getInputProps()} disabled={uploadType === 'single' && !canUpload(uploadCls)} />
                 <UploadCloud size={22} color={uploadType === 'single' && !canUpload(uploadCls) ? '#ef4444' : 'var(--text-muted)'} style={{ marginBottom: 6 }} />
                 <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)' }}>
                   {uploadedFiles.length > 0 ? `${uploadedFiles.length} file(s) selected` : 'Drop images here'}
@@ -200,8 +212,12 @@ export default function AdminDataset() {
               {msg && <div className="badge" style={{ display: 'block', padding: '8px 10px', marginBottom: 10, background: msg.startsWith('✅') ? 'var(--success-bg)' : 'var(--danger-bg)', color: msg.startsWith('✅') ? 'var(--success-text)' : 'var(--danger-text)' }}>{msg}</div>}
 
               <button className="btn btn-primary" onClick={uploadAll}
-                disabled={uploading || !uploadedFiles.length || (uploadType === 'single' && !canUpload(uploadCls))}
-                style={{ width: '100%', padding: 11 }}>
+                disabled={uploading}
+                style={{
+                  width: '100%', padding: 11,
+                  opacity: (!uploading && (!uploadedFiles.length || (uploadType === 'single' && !canUpload(uploadCls)))) ? 0.5 : 1,
+                  cursor: (!uploading && (!uploadedFiles.length || (uploadType === 'single' && !canUpload(uploadCls)))) ? 'not-allowed' : 'pointer',
+                }}>
                 {uploading ? 'Uploading...' : `Upload ${uploadedFiles.length ? `(${uploadedFiles.length})` : ''}`}
               </button>
             </div>
