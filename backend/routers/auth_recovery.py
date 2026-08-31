@@ -27,14 +27,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import String, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from pydantic import BaseModel, EmailStr
-
 from database.connection import get_db, Base
 from routers.admin import AdminUser, get_admin, pwd_ctx
 from app.config import settings
-
 router = APIRouter(prefix="/admin", tags=["Admin Auth Recovery"])
-
-
 class PasswordResetOTP(Base):
     __tablename__ = "password_reset_otp"
     id:         Mapped[str] = mapped_column(String(36), primary_key=True,
@@ -44,25 +40,17 @@ class PasswordResetOTP(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     used:       Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-
-
 class ChangeCredentialsReq(BaseModel):
     current_password: str
     new_username: Optional[str] = None
     new_password: Optional[str] = None
-
-
 class ForgotPasswordRequestReq(BaseModel):
     email: EmailStr
-
-
 class ForgotPasswordVerifyReq(BaseModel):
     email: EmailStr
     otp_code: str
     new_password: str
     new_username: Optional[str] = None
-
-
 def _send_otp_email(to_email: str, otp_code: str):
     if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
         raise HTTPException(500,
@@ -88,7 +76,6 @@ def _send_otp_email(to_email: str, otp_code: str):
     </div>
     """
     msg.attach(MIMEText(body, "html"))
-
     try:
         with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15) as server:
             server.starttls()
@@ -100,30 +87,23 @@ def _send_otp_email(to_email: str, otp_code: str):
             "(not your normal password) — see routers/auth_recovery.py header.")
     except Exception as e:
         raise HTTPException(500, f"Failed to send email: {e}")
-
-
 # ── Change credentials (logged in) ──────────────────────────────────────
 @router.put("/change-credentials")
 def change_credentials(req: ChangeCredentialsReq, db: Session = Depends(get_db),
                        user: AdminUser = Depends(get_admin)):
     if not pwd_ctx.verify(req.current_password, user.hashed_pw):
         raise HTTPException(401, "Current password is incorrect")
-
     if req.new_username and req.new_username != user.username:
         existing = db.query(AdminUser).filter_by(username=req.new_username).first()
         if existing:
             raise HTTPException(400, "Username already taken")
         user.username = req.new_username
-
     if req.new_password:
         if len(req.new_password) < 6:
             raise HTTPException(400, "New password must be at least 6 characters")
         user.hashed_pw = pwd_ctx.hash(req.new_password)
-
     db.commit()
     return {"message": "Credentials updated successfully", "username": user.username}
-
-
 # ── Forgot password — request OTP ────────────────────────────────────────
 @router.post("/forgot-password/request")
 def forgot_password_request(req: ForgotPasswordRequestReq, db: Session = Depends(get_db)):
@@ -131,7 +111,6 @@ def forgot_password_request(req: ForgotPasswordRequestReq, db: Session = Depends
     if not user:
         # Don't reveal whether the email is registered
         return {"message": "If that email is registered, a reset code has been sent."}
-
     otp_code = f"{random.randint(0, 999999):06d}"
     otp = PasswordResetOTP(
         username=user.username, otp_code=otp_code,
@@ -139,12 +118,8 @@ def forgot_password_request(req: ForgotPasswordRequestReq, db: Session = Depends
     )
     db.add(otp)
     db.commit()
-
     _send_otp_email(req.email, otp_code)
-
     return {"message": "If that email is registered, a reset code has been sent."}
-
-
 # ── Forgot password — verify OTP + set new password ─────────────────────
 @router.post("/forgot-password/verify")
 def forgot_password_verify(req: ForgotPasswordVerifyReq, db: Session = Depends(get_db)):
@@ -164,14 +139,11 @@ def forgot_password_verify(req: ForgotPasswordVerifyReq, db: Session = Depends(g
         raise HTTPException(400, "New password must be at least 6 characters")
 
     user.hashed_pw = pwd_ctx.hash(req.new_password)
-
     if req.new_username and req.new_username != user.username:
         existing = db.query(AdminUser).filter_by(username=req.new_username).first()
         if existing:
             raise HTTPException(400, "Username already taken")
         user.username = req.new_username
-
     otp.used = True
     db.commit()
-
     return {"message": "Password reset successfully", "username": user.username}

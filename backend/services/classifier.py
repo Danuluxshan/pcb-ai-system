@@ -52,15 +52,17 @@ class DefectClassifier:
         if model_path:
             import os
             if os.path.exists(model_path):
-                state = torch.load(model_path,
-                                   map_location=self.device)
+                state = torch.load(model_path, map_location=self.device)
                 self.model.load_state_dict(state, strict=False)
                 print(f"✅ DefectClassifier weights loaded: {model_path}")
             else:
-                print(f"⚠️ DefectClassifier weights not found at {model_path}")
-                print("   Using pretrained MobileNetV2 features (library mode)")
+                # Expected, by-design fallback — no fine-tuned defect-classifier
+                # weights are provided in this deployment, so generic
+                # ImageNet-pretrained MobileNetV2 features are used instead.
+                # This is intentional (see dissertation: Limitations), not an error.
+                print(f"ℹ️  DefectClassifier: running in library mode (pretrained MobileNetV2 features)")
         else:
-            print("✅ DefectClassifier running in library mode (MobileNetV2)")
+            print("ℹ️  DefectClassifier: running in library mode (pretrained MobileNetV2 features)")
 
         self.transform = T.Compose([
             T.ToPILImage(),

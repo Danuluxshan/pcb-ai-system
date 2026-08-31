@@ -5,6 +5,7 @@ import {
   TrendingUp, ClipboardList, Activity,
 } from 'lucide-react';
 import { getHistory, deleteInspection, downloadReport } from '../services/api';
+import { formatDateTime } from '../utils/dateFormat';
 
 const getBand = (score) =>
   score >= 80 ? { label: 'Good', color: 'var(--success-text)', bg: 'var(--success-bg)' }
@@ -173,7 +174,7 @@ export default function History() {
           ) : (
             filtered.map((item, idx) => {
               const band = getBand(item.health_score || 0);
-              const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+              const dateStr = formatDateTime(item.created_at);
               return (
                 <div key={item.id}
                   className={`fade-in-up stagger-${Math.min(idx + 1, 6)}`}

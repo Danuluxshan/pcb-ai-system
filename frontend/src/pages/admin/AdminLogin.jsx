@@ -6,8 +6,8 @@ import { adminLogin } from '../../services/adminApi';
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPw,   setShowPw]   = useState(false);
-  const [loading,  setLoading]  = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -85,15 +85,16 @@ export default function AdminLogin() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
           <div style={{
-            width: 56, height: 56, borderRadius: 16, margin: '0 auto 16px',
-            background: 'linear-gradient(135deg, #1e3a5f, #16496b)',
+            width: 70, height: 70, borderRadius: 16, margin: '0 auto 16px',
+            background: 'linear-gradient(135deg, #fbfcfd, #ecf814)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 8px 24px rgba(30,58,95,0.5)',
           }}>
-            <Gem size={26} color="#7dd3fc" />
+            <img src="/logo/PCB_Smart_Assist_Logo.png" alt="PCB SmartAssist"
+              style={{ width: 64, height: 64, objectFit: 'contain', margin: '16px auto 16px', display: 'block' }} />
           </div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: -0.4 }}>
-            PCB AI Admin
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: -0.4, textAlign: 'center' }}>
+            PCB SmartAssist Admin
           </div>
           <div style={{ fontSize: 12.5, color: '#8aa4ba', marginTop: 5 }}>
             Sign in to manage models and training
@@ -160,8 +161,8 @@ export default function AdminLogin() {
             boxShadow: loading ? 'none' : '0 8px 20px rgba(30,58,95,0.4)',
             transition: 'all 200ms ease', marginTop: 6,
           }}
-          onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
             {loading ? <><Loader2 size={15} style={{ animation: 'pulseDot 1s ease infinite' }} /> Signing in...</> : <><LogIn size={15} /> Sign In</>}
           </button>
         </form>

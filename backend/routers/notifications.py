@@ -14,7 +14,7 @@ Public endpoints (no auth — shown in the main app's bell icon):
   POST /notifications/read-all      -> mark all as read
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -29,8 +29,7 @@ router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 class Notification(Base):
     __tablename__ = "notifications"
-    id:         Mapped[str] = mapped_column(String(36), primary_key=True,
-                                            default=lambda: str(uuid.uuid4()))
+    id:         Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     type:       Mapped[str] = mapped_column(String(50))
     title:      Mapped[str] = mapped_column(String(200))
     message:    Mapped[str] = mapped_column(Text)
@@ -38,8 +37,6 @@ class Notification(Base):
     is_read:    Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     device_id:  Mapped[str] = mapped_column(String(64), nullable=True, index=True)
-
-
 def create_notification(db: Session, type: str, title: str, message: str,
                         link: Optional[str] = None, device_id: Optional[str] = None) -> Notification:
     """Call this from other routers at the point an event happens.
@@ -49,45 +46,30 @@ def create_notification(db: Session, type: str, title: str, message: str,
     db.add(n)
     db.commit()
     return n
-
-
 def _serialize(n: Notification) -> dict:
     return {
         "id": n.id, "type": n.type, "title": n.title, "message": n.message,
         "link": n.link, "is_read": n.is_read,
         "created_at": n.created_at.isoformat(),
     }
-
-
 @router.get("")
 def list_notifications(limit: int = 20, device_id: str = None, db: Session = Depends(get_db)):
-    q = db.query(Notification)
+    cutoff = datetime.utcnow() - timedelta(days=3)
+    q = db.query(Notification).filter(Notification.created_at >= cutoff)
     if device_id:
-        q = q.filter(
-            (Notification.device_id == device_id) | (Notification.device_id.is_(None))
-        )
+        q = q.filter((Notification.device_id == device_id) | (Notification.device_id.is_(None)))
     else:
         q = q.filter(Notification.device_id.is_(None))
     rows = q.order_by(Notification.created_at.desc()).limit(limit).all()
-
-    # Unread badge counts only this device's own private notifications +
-    # global ones — but "mark all read" only touches this device's own rows,
-    # so one user's action can't hide a global announcement for everyone.
     unread = q.filter(Notification.is_read == False).count()
-
-    return {
-        "notifications": [_serialize(n) for n in rows],
-        "unread_count": unread,
-    }
-
+    return {"notifications": [_serialize(n) for n in rows], "unread_count": unread}
 
 @router.get("/unread-count")
 def unread_count(device_id: str = None, db: Session = Depends(get_db)):
-    q = db.query(Notification)
+    cutoff = datetime.utcnow() - timedelta(days=3)
+    q = db.query(Notification).filter(Notification.created_at >= cutoff)
     if device_id:
-        q = q.filter(
-            (Notification.device_id == device_id) | (Notification.device_id.is_(None))
-        )
+        q = q.filter((Notification.device_id == device_id) | (Notification.device_id.is_(None)))
     else:
         q = q.filter(Notification.device_id.is_(None))
     return {"unread_count": q.filter(Notification.is_read == False).count()}
