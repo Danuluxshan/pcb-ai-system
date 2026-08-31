@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, ScanLine, Settings, Boxes, Check } from 'lucide-react';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../services/api';
+import { formatRelative } from '../utils/dateFormat';
 
 const TYPE_ICON = {
   inspection_complete: { Icon: ScanLine, color: '#38bdf8' },
@@ -135,7 +136,7 @@ export default function NotificationBell() {
                         {n.message}
                       </div>
                       <div style={{ fontSize: 9.5, color: 'var(--text-muted)', marginTop: 4 }}>
-                        {timeAgo(n.created_at)}
+                        {formatRelative(n.created_at)}
                       </div>
                     </div>
                     {!n.is_read && (

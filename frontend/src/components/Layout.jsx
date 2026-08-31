@@ -3,6 +3,7 @@ import { Gem, LayoutDashboard, Upload, ScanLine, Stethoscope, History, BookOpen 
 import NotificationBell from './NotificationBell';
 import ChatWidget from './ChatWidget';
 import { useApiStatus } from '../hooks/useApiStatus';
+import Logo from './Logo';
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -31,16 +32,20 @@ export default function Layout({ children }) {
           padding: '18px 16px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.07)',
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'linear-gradient(135deg, #1e3a5f, #16496b)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <Gem size={16} color="#7dd3fc" />
-          </div>
-          <div>
-            <div style={{ color: '#fff', fontWeight: 700, fontSize: 13, letterSpacing: -0.2 }}>PCB AI</div>
-            <div style={{ color: '#5c7086', fontSize: 10 }}>Inspection System v1.0</div>
+
+          <div style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 16px' }}>
+            <div style={{
+              width: 70, height: 70, borderRadius: 16, margin: '0 auto 16px',
+              background: 'linear-gradient(135deg, #fbfcfd, #fafafa)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(30,58,95,0.5)',
+            }}>
+              <img src="/logo/PCB_Smart_Assist_Logo.png" alt="PCB SmartAssist"
+                style={{ width: 64, height: 64, objectFit: 'contain', margin: '16px auto 16px', display: 'block' }} />
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: -0.4, textAlign: 'center' }}>
+              PCB SmartAssist
+            </div>
           </div>
         </div>
 

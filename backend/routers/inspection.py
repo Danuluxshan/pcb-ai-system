@@ -3,6 +3,7 @@ import uuid, time
 import numpy as np
 import cv2
 from fastapi import APIRouter, File, UploadFile, Request, HTTPException, Depends, Query, Form
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -54,11 +55,17 @@ async def inspect(
     inspection_id = str(uuid.uuid4())
 
     # ── Step 1: Detection ────────────────────────────────────────────
+    import time as _time
+    _t0 = _time.time()
+    print(f"🔍 Starting detection (SAHI={use_sahi})...", flush=True)
+
     detector = request.app.state.detector
     if use_sahi:
-        det_result = detector.detect_sahi(image)
+        det_result = await run_in_threadpool(detector.detect_sahi, image)
     else:
-        det_result = detector.detect(image)
+        det_result = await run_in_threadpool(detector.detect, image)
+
+    print(f"✅ Detection completed in {_time.time()-_t0:.1f}s, {len(det_result.get('detections',[]))} components", flush=True)
 
     # ── Step 2: Save annotated image ─────────────────────────────────
     annotated_url = detector.save_annotated(
@@ -80,18 +87,16 @@ async def inspect(
         bbox    = det["bbox"]
 
         # Defect classification
-        clf_result  = classifier.classify(image, bbox)
+        clf_result  = await run_in_threadpool(classifier.classify, image, bbox)
         severity    = clf_result["severity"]
         severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
         # OCR
-        ocr_result = ocr.read(image, bbox)
+        ocr_result = await run_in_threadpool(ocr.read, image, bbox)
 
         # Grad-CAM heatmap
         defect_idx  = list(classifier.model.classifier[1].weight.shape)[0]
-        heatmap_url = xai.generate(
-            image, bbox, 0, inspection_id, comp_id
-        )
+        heatmap_url = await run_in_threadpool(xai.generate, image, bbox, 0, inspection_id, comp_id)
 
         # Repair advice from knowledge base
         instr = kb_service.get_instructions(det["class_name"])

@@ -8,6 +8,7 @@ import { getAdminUser, adminLogout } from '../services/adminApi';
 
 import { Settings as SettingsIcon } from 'lucide-react';
 import AdminSettingsModal from './AdminSettingsModal';
+import Logo from '../components/Logo';
 
 const NAV_ITEMS = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -35,12 +36,11 @@ export default function AdminSidebar({ active }) {
         padding: '18px 16px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.07)',
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
-        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #1e3a5f, #16496b)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Gem size={16} color="#7dd3fc" />
-        </div>
         <div style={{ flex: 1 }}>
-          <div style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>PCB AI Admin</div>
-          <div style={{ color: '#5c7086', fontSize: 10 }}>{getAdminUser()}</div>
+          <div style={{ padding: '20px 16px' }}>
+            <Logo size={34} dark={true} />
+          </div>
+          {/* <div style={{ color: '#5c7086', fontSize: 10 }}>{getAdminUser()}</div> */}
         </div>
         <div onClick={() => setSettingsOpen(true)} style={{ color: '#5c7086', cursor: 'pointer', padding: 4 }}>
           <SettingsIcon size={15} />
@@ -102,6 +102,7 @@ export default function AdminSidebar({ active }) {
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
           <LogOut size={13} /> Sign out
         </div>
+        <div style={{ color: '#5c7086', fontSize: 10 }}>{getAdminUser()}</div>
       </div>
 
       {/* Confirmation modal */}

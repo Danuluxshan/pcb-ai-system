@@ -49,7 +49,7 @@ class DetectionService:
             sahi_model = AutoDetectionModel.from_pretrained(
                 model_type="ultralytics",
                 model_path=str(self.model.ckpt_path),
-                confidence_threshold=0.20,
+                confidence_threshold=0.35,   # was 0.20 — too permissive, caused mass false-positives
                 device="cpu",
             )
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
@@ -60,6 +60,8 @@ class DetectionService:
                 tmp_path, sahi_model,
                 slice_height=640, slice_width=640,
                 overlap_height_ratio=0.2, overlap_width_ratio=0.2,
+                postprocess_type="NMS",              # explicit duplicate suppression across tiles
+                postprocess_match_threshold=0.3,     # stricter merge threshold for overlapping boxes
                 verbose=0,
             )
             os.unlink(tmp_path)
@@ -77,6 +79,11 @@ class DetectionService:
                     },
                     "is_uncertain": float(pred.score.value) < settings.DEFECT_CONF_THRESHOLD,
                 })
+
+            if len(detections) > 150:
+                print(f"⚠️ SAHI produced {len(detections)} detections — capping to top 150 by confidence", flush=True)
+                detections.sort(key=lambda d: d["confidence"], reverse=True)
+                detections = detections[:150]
 
             # Draw on image
             annotated = image.copy()
